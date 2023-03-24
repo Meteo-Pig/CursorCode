@@ -11,7 +11,7 @@
 
 # 开始使用
 
-在vscode扩展商店中搜索CursorCode
+在[vscode扩展商店](https://marketplace.visualstudio.com/items?itemName=meteorstudio.cursorcode)中搜索**CursorCode**进行安装
 
 重载窗口，在右侧选中Cursor图标进入
 
