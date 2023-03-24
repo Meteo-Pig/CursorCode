@@ -16,10 +16,16 @@
 
 2. 在左侧选中Cursor光标图标进入对话框页面
 3. 可以直接输入问题，也可以在代码框中选中代码进行询问
-4. 在代码框中右击代码，或者在空白处右击，在弹出菜单中点击CursorCode，在弹出的输入框中输入需求（生成/优化代码）
+4. 在代码框中右击代码，或者在空白处右击，在弹出菜单中点击**CursorCode**，在弹出的输入框中输入需求（生成/优化代码）
 
 > 注意：询问前请先在代码框中点击，让光标保持在某一处（为了让AI更好的理解代码上下文）
 
+<center><img src="https://s1.ax1x.com/2023/03/24/ppBBykV.png"></center>
+
+<center><img src="https://s1.ax1x.com/2023/03/24/ppBB6YT.png"></center>
+
+<center><img src="https://s1.ax1x.com/2023/03/24/ppBBcfU.png"></center>
+
 # 友情链接
 
-[My Github](https://github.com/Meteo-Pig/CursorCode)	[My Bilibili](https://space.bilibili.com/37295121)	[Cursor](https://www.cursor.so/)
+[My Github](https://github.com/Meteo-Pig/CursorCode)		[My Bilibili](https://space.bilibili.com/37295121)		[Cursor](https://www.cursor.so/)
