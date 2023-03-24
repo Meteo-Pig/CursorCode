@@ -106,3 +106,5 @@ dist
 *.vsix
 
 src/test
+
+.vscode

@@ -1,4 +1,4 @@
-![extensionIcon](README.assets/extensionIcon-1679642331047.png)
+![extensionIcon](resources/extensionIcon.png)
 
 <h2 align="center">A Visual Studio Code - CursorCode</h2>
 <p align="center"><strong>Write, edit, and chat about your code with a powerful AI</strong></p>
