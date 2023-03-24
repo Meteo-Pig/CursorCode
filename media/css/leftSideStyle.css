@@ -7,9 +7,10 @@ input {
     /* border-color: var(--vscode-input-border); */
 }
 
-#chat-box {
+
+/* #chat-box {
     margin-bottom: 80px;
-}
+} */
 
 #prompt-input {
     padding: 6px;
@@ -55,4 +56,34 @@ code {
 
 #read-box p {
     margin-bottom: 10px;
+}
+
+.response-box {
+    width:100%;
+    display: flex;
+    justify-content: center;
+}
+
+#stop-response {
+    display: none;
+    width: 80px;
+    padding: 2px 6px 2px 6px;
+    color: var(--vscode-focusBorder);
+    border: 1px solid var(--vscode-focusBorder);
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+#stop-response:hover {
+    color: var(--vscode-errorForeground);
+    border: 1px solid var(--vscode-errorForeground);
+}
+
+#clear-msg {
+    color: var(--vscode-focusBorder);
+    margin-bottom: 5px;
+}
+
+#clear-msg:hover {
+    color: var(--vscode-errorForeground);
 }

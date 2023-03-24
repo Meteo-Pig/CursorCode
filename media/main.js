@@ -50,7 +50,13 @@
     }
   });
 
+  let stopBtn = document.getElementById('stop-response');
   let clearBtn = document.getElementById('clear-msg');
+
+  stopBtn.addEventListener('click', function (e) {
+    showInput(true, "已经结束响应，请开始新的问答...")
+  })
+
   clearBtn.addEventListener('click', function (e) {
     vscode.postMessage({
       type: 'clear'
@@ -63,14 +69,16 @@
     let input = document.getElementById('prompt-input');
     if (type) {
       if (msg) {
-        let ele_div = document.querySelector('.chat-answer:last-child')
+        let ele_div = document.querySelector('.chat-answer:last-child');
         ele_div.innerText = msg;
       }
       box.style.pointerEvents = 'all';
+      stopBtn.style.display = 'none';
     } else {
       box.style.pointerEvents = 'none';
       input.value = '';
-      input.blur()
+      input.blur();
+      stopBtn.style.display = 'block';
     }
   }
 
@@ -91,6 +99,11 @@
   }
 
   function addAnswer(content) {
+    // 如果是停止响应，不再添加内容
+    if(stopBtn.style.display=='none'){ 
+      return;
+    }
+
     if (receiveData.msgType != 'freeform') {
       const fileSplit = receiveData.fileName.split('.')
       const lang = fileSplit[fileSplit.length - 1]

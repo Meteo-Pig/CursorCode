@@ -118,6 +118,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
           break;
         }
         case "prompt": {
+          this.msgType = 'freeform';
           this.message = data.value;
           this.conversation();
         }
@@ -443,14 +444,19 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
       <div id="read-box">
         <p style="font-size: 1.6em">欢迎使用CursorCode</p>
         <p>对话会话：在下方输入框中输入问题</p>
-        <p>代码生成：右键编辑框,在菜单中点击CourseCode选项输入需求</p>
-        <p>代码优化：在编辑框中选中代码,右键在菜单中点击CourseCode选项输入需求</p>
-        <p>代码优化：在编辑框中选中代码，在下方输入框中输入需求</p>
+        <p>代码生成：右键代码框,在菜单中点击CourseCode选项输入需求</p>
+        <p>代码优化：在代码框中选中代码,右键在菜单中点击CourseCode选项，在上方弹出的输入框中输入需求</p>
+        <p>代码优化：在代码框中选中代码，在下方输入框中输入需求</p>
+        <p>插入代码：在对话框中生成的代码，点击代码可插入到代码框中的光标处</p>
+        <p>Tips：如果出现空白，没有回答内容的情况，请直接点击停止响应</p>
         <p>Bilibili：https://space.bilibili.com/37295121</p>
         <p>Github：https://github.com/Meteo-Pig/CursorCode</p>
       </div>
 
       <div id="chat-box" class="pt-6 text-sm">请输入你的问题：</div>
+      <div class="response-box"><button id="stop-response">停止响应</button></div>
+      <div style="height: 80px;"></div>
+
       <div id="bottom-box">
         <button id="clear-msg">清除会话</button>
         <input class="h-10 w-full p-4 text-sm" type="text" id="prompt-input" placeholder="请输入你的问题..."/>
