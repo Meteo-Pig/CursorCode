@@ -26,6 +26,12 @@
 
 <center><img src="https://s1.ax1x.com/2023/03/24/ppBBcfU.png"></center>
 
+
+
+# 视频教程
+
+[https://www.bilibili.com/video/BV1iv4y1G7Js/](https://www.bilibili.com/video/BV1iv4y1G7Js/)
+
 # 友情链接
 
-[My Github](https://github.com/Meteo-Pig/CursorCode)		[My Bilibili](https://space.bilibili.com/37295121)		[Cursor](https://www.cursor.so/)
+[Github](https://github.com/Meteo-Pig/CursorCode)	[Cursor](https://www.cursor.so/)

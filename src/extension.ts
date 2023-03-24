@@ -399,6 +399,14 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
         "tailwind.min.js"
       )
     );
+    const markeddUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "media",
+        "scripts",
+        "marked.min.js"
+      )
+    );
     const highlightUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this._extensionUri,
@@ -436,7 +444,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
 
       <script src="${tailwindUri}"></script>
       <script src="${highlightUri}"></script>
-      <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+      <script src="${markeddUri}"></script>
       <link rel="stylesheet" href="${highlighDefualtUri}">
       <link rel="stylesheet" href="${leftSideStyleUri}">
     </head>
