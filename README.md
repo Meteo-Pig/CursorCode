@@ -1,6 +1,5 @@
-![extensionIcon](resources/extensionIcon.png)
-
-<h2 align="center">A Visual Studio Code - CursorCode</h2>
+<h2 align="center"><img src="https://s1.ax1x.com/2023/03/24/ppBM3CV.png" height="120">
+<br><br>A Visual Studio Code - CursorCode</h2>
 <p align="center"><strong>Write, edit, and chat about your code with a powerful AI</strong></p>
 <p align="center"><strong>一个基于Cursor API的GPT智能AI代码助手</strong></p>
 
