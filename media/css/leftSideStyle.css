@@ -1,0 +1,58 @@
+.code {
+    white-space: pre;
+}
+
+input {
+    background: var(--vscode-input-background);
+    /* border-color: var(--vscode-input-border); */
+}
+
+#chat-box {
+    margin-bottom: 80px;
+}
+
+#prompt-input {
+    padding: 6px;
+    height: 32px;
+    margin-top: 5px;
+    margin-bottom: 1px;
+    border: 1px solid var(--vscode-focusBorder);
+    border-radius: 6px;
+    /* border-color: var(--vscode-focusBorder); */
+}
+
+#prompt-input::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+}
+
+#bottom-box {
+    position: fixed;
+    width: 96%;
+    right: 2%;
+    bottom: 0px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+.chat-answer {
+    padding: 10px 10px 10px 10px;
+    background-color: var(--vscode-input-background);
+}
+
+.chat-question {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--vscode-focusBorder);
+    padding: 10px 10px 10px 10px;
+}
+
+code {
+    background-color: var(--vscode-editorWidget-background);
+}
+
+#read-box p {
+    margin-bottom: 10px;
+}
