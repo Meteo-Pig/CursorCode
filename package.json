@@ -2,7 +2,7 @@
   "name": "cursorcode",
   "displayName": "CursorCode",
   "description": "a free AI coder with GPT",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "meteorstudio",
   "icon": "resources/extensionIcon.png",
   "license": "MIT",

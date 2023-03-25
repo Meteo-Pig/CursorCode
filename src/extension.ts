@@ -6,6 +6,71 @@ const path = require("path");
 const fs = require("fs");
 import { v4 as uuidv4 } from "uuid";
 
+type ResponseType =
+  | "idk"
+  | "freeform"
+  | "generate"
+  | "edit"
+  | "chat_edit"
+  | "lsp_edit";
+
+interface CodeBlock {
+  fileId: number;
+  text: string;
+  startLine: number;
+  endLine: number;
+}
+
+type CodeSymbolType = "import" | "function" | "class" | "variable";
+interface CodeSymbol {
+  fileName: string;
+  name: string;
+  type: CodeSymbolType;
+}
+
+interface UserMessage {
+  sender: "user";
+  conversationId: string;
+  message: string;
+  msgType: ResponseType;
+  sentAt: number;
+  currentFile: string | null;
+  precedingCode: string | null;
+  procedingCode: string | null;
+  currentSelection: string | null;
+  // Other pieces of info encoded
+  otherCodeBlocks: CodeBlock[];
+  codeSymbols: CodeSymbol[];
+  selection: { from: number; to: number } | null;
+  maxOrigLine?: number;
+}
+
+type BotMessageType =
+  | "edit"
+  | "continue"
+  | "markdown"
+  | "multifile"
+  | "location"
+  | "interrupt"
+  | "chat_edit"
+  | "lsp_edit";
+
+interface BotMessage {
+  sender: "bot";
+  sentAt: number;
+  type: BotMessageType;
+  conversationId: string;
+  message: string;
+  currentFile: string | null;
+  lastToken: string;
+  finished: boolean;
+  interrupted: boolean;
+  rejected?: boolean;
+  hitTokenLimit?: boolean;
+  maxOrigLine?: number;
+  useDiagnostics?: boolean | number;
+}
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -67,14 +132,14 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
 
   public message: string = "";
-  public msgType: string = "freeform";
+  public msgType: ResponseType = "freeform";
   private contextType: string = '"copilot"';
 
-  public pasteOnClick = true;
-  public keepConversation = true;
+  public pasteOnClick: boolean = true;
+  public keepConversation: boolean = true;
 
-  public userMessages: any = [];
-  public botMessages: any = [];
+  public userMessages: UserMessage[] = [];
+  public botMessages: BotMessage[] = [];
   public conversationId: string = "";
 
   constructor(
@@ -118,7 +183,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
           break;
         }
         case "prompt": {
-          this.msgType = 'freeform';
+          this.msgType = "freeform";
           this.message = data.value;
           this.conversation();
         }
@@ -137,6 +202,12 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
    */
   public getPayload() {
     const editor = vscode.window.activeTextEditor!;
+    if (!editor) {
+      vscode.window.showWarningMessage(
+        "CursorCode：对话前请先打开一个代码文件!"
+      );
+      return false;
+    }
     const selection = editor.selection;
 
     // Split the `precedingCode` into chunks of 20 line blocks called `precedingCodeBlocks`
@@ -184,7 +255,10 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
       currentFileContents: editor.document.getText(),
       // Context surrounding the cursor position
       precedingCode: precedingCodeBlocks,
-      currentSelection: editor.document.getText(editor.selection) ?? null,
+      currentSelection:
+        editor.document.getText(selection) == ""
+          ? null
+          : editor.document.getText(selection) ?? null,
       suffixCode: procedingCodeBlocks,
       // Get Copilot values
       copilotCodeBlocks: [],
@@ -224,6 +298,11 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
   public async conversation() {
     // console.log(this.message);
 
+    const payload = this.getPayload();
+    if (!payload) {
+      return;
+    }
+
     // focus gpt activity from activity bar
     if (!this._view) {
       await vscode.commands.executeCommand("cursorcode.chatView.focus");
@@ -238,7 +317,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
       fileName: vscode.window.activeTextEditor?.document.fileName,
     });
 
-    var payload = {
+    var reqData = {
       method: "POST",
       url: "https://aicursor.com/conversation",
       headers: {
@@ -247,10 +326,10 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
         "user-agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/0.1.0 Chrome/108.0.5359.62 Electron/22.0.0 Safari/537.36",
       },
-      data: this.getPayload(),
+      data: payload,
       responseType: "stream",
     };
-    const response = await axios.request(payload);
+    const response = await axios.request(reqData);
     const stream = response.data;
     //解析stream
     let isMsg = false;
@@ -325,8 +404,16 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
           type: "showInput",
           value: "出错啦，请重试...",
         });
-        console.log("异常断开");
+        console.error("异常断开");
       }
+    });
+
+    stream.on("error", (err: any) => {
+      this._view?.webview.postMessage({
+        type: "showInput",
+        value: "出错啦，请重试...",
+      });
+      console.error("异常断开");
     });
   }
 
@@ -350,7 +437,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
       new vscode.Range(selection.end, new vscode.Position(endLine, endLineLen))
     );
 
-    const newUserMessage = {
+    const newUserMessage: UserMessage = {
       sender: "user",
       sentAt: Date.now(),
       message: question,
@@ -361,14 +448,14 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
       precedingCode: precedingCode ?? null,
       procedingCode: procedingCode ?? null,
       currentSelection: editor.document.getText(editor.selection) ?? null,
-      maxOrigLine: null,
+      // maxOrigLine: null,
       selection: null,
       msgType: "freeform",
     };
 
     this.userMessages.push(newUserMessage);
 
-    this.botMessages.push({
+    const newBotMessage: BotMessage = {
       sender: "bot",
       sentAt: Date.now(),
       type: "markdown",
@@ -378,8 +465,10 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
       finished: true,
       currentFile: null,
       interrupted: false,
-      maxOrigLine: null,
-    });
+      // maxOrigLine: null,
+    };
+
+    this.botMessages.push(newBotMessage);
     // Ready for another message in this conversation
     // chatState.draftMessages[newConversationId] = {
     //   ...newUserMessage,
@@ -457,7 +546,6 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
         <p>代码优化：在代码框中选中代码，在下方输入框中输入需求</p>
         <p>插入代码：在对话框中生成的代码，点击代码可插入到代码框中的光标处</p>
         <p>Tips：如果出现空白，没有回答内容的情况，请直接点击停止响应</p>
-        <p>Bilibili：https://space.bilibili.com/37295121</p>
         <p>Github：https://github.com/Meteo-Pig/CursorCode</p>
       </div>
 

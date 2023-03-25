@@ -37,10 +37,20 @@ input {
     justify-content: center;
 }
 
+/* 定义动画 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
 
 .chat-answer {
     padding: 10px 10px 10px 10px;
     background-color: var(--vscode-input-background);
+    animation: fadeIn 1s;
 }
 
 .chat-question {
@@ -48,6 +58,7 @@ input {
     margin-bottom: 10px;
     border-left: 4px solid var(--vscode-focusBorder);
     padding: 10px 10px 10px 10px;
+    animation: fadeIn 1s;
 }
 
 code {
@@ -59,7 +70,7 @@ code {
 }
 
 .response-box {
-    width:100%;
+    width: 100%;
     display: flex;
     justify-content: center;
 }
