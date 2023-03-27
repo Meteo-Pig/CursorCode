@@ -2,7 +2,7 @@
   "name": "cursorcode",
   "displayName": "CursorCode",
   "description": "a free AI coder with GPT",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "meteorstudio",
   "icon": "resources/extensionIcon.png",
   "license": "MIT",
@@ -20,15 +20,33 @@
   "contributes": {
     "commands": [
       {
-        "command": "cursorcode.conversation",
+        "command": "cursorcode.generation",
         "title": "CursorCode"
+      },
+      {
+        "command": "cursorcode.conversation",
+        "title": "CursorCodeConversation"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "cursorcode.generation",
+        "key": "ctrl+alt+y",
+        "mac": "cmd+alt+y",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "cursorcode.conversation",
+        "key": "ctrl+alt+u",
+        "mac": "cmd+alt+u",
+        "when": "editorTextFocus"
       }
     ],
     "menus": {
       "editor/context": [
         {
           "when": "editorTextFocus",
-          "command": "cursorcode.conversation",
+          "command": "cursorcode.generation",
           "group": "cursor-menu"
         }
       ]

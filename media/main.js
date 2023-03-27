@@ -100,7 +100,7 @@
 
   function addAnswer(content) {
     // 如果是停止响应，不再添加内容
-    if(stopBtn.style.display=='none'){ 
+    if (stopBtn.style.display == 'none') {
       return;
     }
 
@@ -109,43 +109,38 @@
       const lang = fileSplit[fileSplit.length - 1]
       content = '```' + lang + '\n' + content + '\n```'
     }
-    // console.log(content)
+
     html = marked.parse(content);
     ele_div = document.querySelector('.chat-answer:last-child')
     ele_div.innerHTML = html
 
-    var preCodeBlocks = document.querySelectorAll("pre code");
-    // console.log(preCodeBlocks)
-    for (var i = 0; i < preCodeBlocks.length; i++) {
-      preCodeBlocks[i].classList.add(
-        "p-2",
-        "my-2",
-        "block",
-        "overflow-x-scroll"
+    preBlocks = ele_div.querySelectorAll('pre')
+    console.log(preBlocks)
+
+    preBlocks.forEach(preTag => {
+      preTag.insertAdjacentHTML('afterbegin',
+        `<div class="code-tool">
+          <a class="copy-btn" href="javascript:;">复制代码</a>
+          <a class="insert-btn" href="javascript:;">插入代码</a>
+       </div>`
       );
-    }
-
-    var codeBlocks = document.querySelectorAll('code');
-    for (var i = 0; i < codeBlocks.length; i++) {
-      // Check if innertext starts with "Copy code"
-      // if (codeBlocks[i].innerText.startsWith("Copy code")) {
-      //   codeBlocks[i].innerText = codeBlocks[i].innerText.replace("Copy code", "");
-      // }
-
-      codeBlocks[i].classList.add("max-w-full", "overflow-hidden", "rounded-sm", "cursor-pointer");
-
-      codeBlocks[i].addEventListener('click', function (e) {
+      let copyBtn = preTag.querySelector('.copy-btn');
+      let insertBtn = preTag.querySelector('.insert-btn');
+      let codeText = preTag.querySelector('code').innerText;
+      copyBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        navigator.clipboard.writeText(codeText);
+      })
+      insertBtn.addEventListener('click', function (e) {
         e.preventDefault();
         vscode.postMessage({
           type: 'codeSelected',
-          value: this.innerText
+          value: codeText
         });
-      });
-    }
+      })
+    });
 
     window.scrollTo(0, document.body.scrollHeight);
-
-    // hljs.highlightAll();
 
   }
 

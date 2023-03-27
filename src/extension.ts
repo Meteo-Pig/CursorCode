@@ -81,14 +81,6 @@ export function activate(context: vscode.ExtensionContext) {
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand(
-    "cursorcode.helloWorld",
-    () => {
-      // The code you place here will be executed every time your command is executed
-      // Display a message box to the user
-      vscode.window.showInformationMessage("Hello World from CursorCode!");
-    }
-  );
 
   const provider = new CursorWebviewViewProvider(
     context.extensionUri,
@@ -103,12 +95,15 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  const menuAsk = vscode.commands.registerTextEditorCommand(
-    "cursorcode.conversation",
+  const generationDispose = vscode.commands.registerTextEditorCommand(
+    "cursorcode.generation",
     (editor: vscode.TextEditor) => {
       // console.log(editor);
       vscode.window
-        .showInputBox({ prompt: "主人，您有何吩咐?" })
+        .showInputBox({
+          prompt: "主人，您有何吩咐?",
+          placeHolder: "请帮我生成/优化/审查...",
+        })
         .then((value) => {
           const selected = editor.document.getText(editor.selection);
           if (selected) {
@@ -125,7 +120,31 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(disposable, menuAsk, curosrDispose);
+  const conversationDispose = vscode.commands.registerTextEditorCommand(
+    "cursorcode.conversation",
+    (editor: vscode.TextEditor) => {
+      // console.log(editor);
+      vscode.window
+        .showInputBox({
+          prompt: "主人，您有什么问题吗?",
+          placeHolder: "帮我解释一下这段代码...",
+        })
+        .then((value) => {
+          provider.msgType = "freeform";
+          if (value) {
+            provider.message = value!;
+            provider.conversation();
+            // console.log(value);
+          }
+        });
+    }
+  );
+
+  context.subscriptions.push(
+    generationDispose,
+    curosrDispose,
+    conversationDispose
+  );
 }
 
 class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
@@ -329,7 +348,16 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
       data: payload,
       responseType: "stream",
     };
-    const response = await axios.request(reqData);
+    let response;
+    try {
+      response = await axios.request(reqData);
+    } catch (e) {
+      this._view?.webview.postMessage({
+        type: "showInput",
+        value: "使用超出上限，请重试，如果还是不行，请稍等几分钟重试...",
+      });
+      return;
+    }
     const stream = response.data;
     //解析stream
     let isMsg = false;
@@ -375,6 +403,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
                 type: "showInput",
                 value: "出错啦，请重试...",
               });
+              return;
             }
 
             // Replace all occurrences of "/path/to/file.extension\n" with "file.extension\n"
@@ -405,6 +434,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
           value: "出错啦，请重试...",
         });
         console.error("异常断开");
+        return;
       }
     });
 
@@ -414,6 +444,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
         value: "出错啦，请重试...",
       });
       console.error("异常断开");
+      return;
     });
   }
 
@@ -544,7 +575,8 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
         <p>代码生成：右键代码框,在菜单中点击CourseCode选项输入需求</p>
         <p>代码优化：在代码框中选中代码,右键在菜单中点击CourseCode选项，在上方弹出的输入框中输入需求</p>
         <p>代码优化：在代码框中选中代码，在下方输入框中输入需求</p>
-        <p>插入代码：在对话框中生成的代码，点击代码可插入到代码框中的光标处</p>
+        <p>快捷键一：在代码框中按下Ctrl+Alt+Y弹出代码生成/优化命令框</p>
+        <p>快捷键二：在代码框中按下Ctrl+Alt+U弹出对话消息发送框</p>
         <p>Tips：如果出现空白，没有回答内容的情况，请直接点击停止响应</p>
         <p>Github：https://github.com/Meteo-Pig/CursorCode</p>
       </div>

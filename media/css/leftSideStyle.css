@@ -42,6 +42,7 @@ input {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -61,8 +62,42 @@ input {
     animation: fadeIn 1s;
 }
 
+pre {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
 code {
+    display: block;
+    padding: 0.5rem;
     background-color: var(--vscode-editorWidget-background);
+    overflow-x: scroll;
+}
+
+.code-tool {
+    display: flex;
+    justify-content: end;
+    padding: 4px 6px 0px 0px;
+    gap: 10px;
+    background-color: var(--vscode-editorWidget-background);
+}
+
+.code-tool a {
+    font-size: 0.8rem;
+    color: var(--vscode-textLink-foreground);
+    font-family: var(--vscode-font-family);
+    font-weight: var(--vscode-font-weight);
+}
+
+.code-tool a:hover {
+    color: var(--vscode-textLink-activeForeground);
+}
+.code-tool a:active {
+    border: none;
+}
+
+.code-tool a:focus {
+    border: none;
 }
 
 #read-box p {
