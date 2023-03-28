@@ -150,6 +150,7 @@ export function activate(context: vscode.ExtensionContext) {
 class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
 
+  private url: string = "https://aicursor.com";
   public message: string = "";
   public msgType: ResponseType = "freeform";
   private contextType: string = '"copilot"';
@@ -315,8 +316,6 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
   }
 
   public async conversation() {
-    // console.log(this.message);
-
     const payload = this.getPayload();
     if (!payload) {
       return;
@@ -338,7 +337,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
 
     var reqData = {
       method: "POST",
-      url: "https://aicursor.com/conversation",
+      url: this.url + "/conversation",
       headers: {
         "accept-language": "zh-CN",
         "content-type": "application/json",
@@ -359,9 +358,83 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
       return;
     }
     const stream = response.data;
+    this.streamSource(stream);
+  }
+
+  public async continue(answer: string) {
+    const payload = this.getPayload();
+    if (!payload) {
+      return;
+    }
+
+    const newBotMessage: BotMessage = {
+      sender: "bot",
+      sentAt: Date.now(),
+      type: "edit",
+      conversationId: "4963cd28-39b8-424c-8c21-ef1aa5b06c74",
+      lastToken: "",
+      message: answer,
+      finished: false,
+      currentFile: payload.userRequest.currentFileName,
+      interrupted: true,
+      hitTokenLimit: true,
+      maxOrigLine: vscode.window.activeTextEditor?.document.lineCount! - 1,
+    };
+    payload.botMessages.push(newBotMessage);
+
+    console.log(payload);
+
+    // focus gpt activity from activity bar
+    if (!this._view) {
+      await vscode.commands.executeCommand("cursorcode.chatView.focus");
+    } else {
+      this._view?.show?.(true);
+    }
+
+    this._view?.webview.postMessage({
+      type: "addQuestion",
+      value: this.message,
+      msgType: this.msgType,
+      fileName: vscode.window.activeTextEditor?.document.fileName,
+    });
+
+    var reqData = {
+      method: "POST",
+      url: this.url + "/continue",
+      headers: {
+        "accept-language": "zh-CN",
+        "content-type": "application/json",
+        "user-agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/0.1.0 Chrome/108.0.5359.62 Electron/22.0.0 Safari/537.36",
+      },
+      data: payload,
+      responseType: "stream",
+    };
+    let response;
+    try {
+      response = await axios.request(reqData);
+    } catch (e) {
+      console.log(response);
+      console.log(e);
+      this._view?.webview.postMessage({
+        type: "showInput",
+        value: "使用超出上限，请重试，如果还是不行，请稍等几分钟重试...",
+      });
+      return;
+    }
+    const stream = response.data;
+    this.streamSource(stream);
+  }
+
+  /**
+   * 解析stream
+   * @param stream 数据流
+   */
+  private streamSource(stream: any) {
     //解析stream
     let isMsg = false;
     let content = "";
+    let isInterrupt = false;
     stream.on("data", (data: any) => {
       data = data.toString();
       const lines = data.split("\n");
@@ -388,6 +461,10 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
               this.manufacturedConversation(this.message, content);
             }
             isMsg = false;
+          }
+          if (jsonString.indexOf("<|END_interrupt|>") != -1) {
+            jsonString = jsonString.replace("<|END_interrupt|>", "");
+            isInterrupt = true;
           }
 
           if (isMsg) {
@@ -422,6 +499,10 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
               type: "addAnswer",
               value: newContent,
             });
+            // if(isInterrupt) {
+            //   this.continue(newContent);
+            //   return;
+            // }
           }
         }
       }

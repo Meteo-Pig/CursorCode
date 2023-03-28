@@ -1,9 +1,12 @@
-# Change Log
+## [0.0.7]
 
-All notable changes to the "cursorcode" extension will be documented in this file.
+- 优化对话中代码显示效果
+- 优化部分功能
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## [0.0.6]
 
-## [Unreleased]
+- 增加快捷键：Ctrl+Alt+Y呼出代码输入框
+- 增加快捷键：Ctrl+Alt+U呼出对话输入框
+- 优化对话中代码一键插入功能，添加一键复制
+- 优化反馈提示
 
-- Initial release

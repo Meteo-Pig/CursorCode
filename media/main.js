@@ -115,7 +115,6 @@
     ele_div.innerHTML = html
 
     preBlocks = ele_div.querySelectorAll('pre')
-    console.log(preBlocks)
 
     preBlocks.forEach(preTag => {
       preTag.insertAdjacentHTML('afterbegin',
