@@ -52,6 +52,7 @@
 
   let stopBtn = document.getElementById('stop-response');
   let clearBtn = document.getElementById('clear-msg');
+  let loginBtn = document.getElementById('login-btn');
 
   stopBtn.addEventListener('click', function (e) {
     showInput(true, "已经结束响应，请开始新的问答...")
@@ -62,6 +63,12 @@
       type: 'clear'
     });
     document.getElementById("chat-box").innerHTML = '';
+  })
+
+  loginBtn.addEventListener('click', function (e) {
+    vscode.postMessage({
+      type: 'loginCursor'
+    });
   })
 
   function showInput(type, msg) {

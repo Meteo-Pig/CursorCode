@@ -1,8 +1,8 @@
 {
   "name": "cursorcode",
-  "displayName": "CursorCode",
+  "displayName": "CursorCode(Cursor for VSCode)",
   "description": "a free AI coder with GPT",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "publisher": "meteorstudio",
   "icon": "resources/extensionIcon.png",
   "license": "MIT",
@@ -68,6 +68,16 @@
           "name": "CursorCode"
         }
       ]
+    },
+    "configuration": {
+      "title": "CursorCodeConfig",
+      "properties": {
+        "cursorcode.accessToken": {
+          "type": "string",
+          "default": "",
+          "description": "登录令牌"
+        }
+      }
     }
   },
   "scripts": {

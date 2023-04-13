@@ -4,7 +4,9 @@ import * as vscode from "vscode";
 const axios = require("axios").default;
 const path = require("path");
 const fs = require("fs");
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid"; 
+
+import { loginCursor } from "./auth";
 
 type ResponseType =
   | "idk"
@@ -153,7 +155,9 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
   private url: string = "https://aicursor.com";
   public message: string = "";
   public msgType: ResponseType = "freeform";
-  private contextType: string = '"copilot"';
+  private contextType: string = 'copilot';
+
+  private accessToken: string = '';
 
   public pasteOnClick: boolean = true;
   public keepConversation: boolean = true;
@@ -165,7 +169,15 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly extensionPath: string
-  ) {}
+  ) {
+    // 获取配置项
+    const config = vscode.workspace.getConfiguration('cursorcode');
+    // 获取配置项中的文本
+    const cursorToken:string = config.get('accessToken') as string;
+    // 显示文本
+    this.accessToken = cursorToken;
+    // console.log(cursorToken)
+  }
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
@@ -185,7 +197,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     // add an event listener for messages received by the webview
-    webviewView.webview.onDidReceiveMessage((data) => {
+    webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
         case "codeSelected": {
           // do nothing if the pasteOnClick option is disabled
@@ -206,11 +218,29 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
           this.msgType = "freeform";
           this.message = data.value;
           this.conversation();
+          break
         }
         case "clear": {
           this.userMessages = [];
           this.botMessages = [];
           this.conversationId = "";
+          break
+        }
+        case "loginCursor": {
+          const loginData: any = await loginCursor()
+          if(loginData){
+            this.accessToken = loginData.accessToken;
+             // 获取配置项
+            const config = vscode.workspace.getConfiguration('cursorcode');
+            // 将文本保存到配置项里面
+            config.update('accessToken', loginData.accessToken, vscode.ConfigurationTarget.Global);
+            config.update('refreshToken', loginData.refreshToken, vscode.ConfigurationTarget.Global);
+            config.update('challenge', loginData.challenge, vscode.ConfigurationTarget.Global);
+            vscode.window.showInformationMessage("登录成功");
+          }else {
+            vscode.window.showInformationMessage("登录失败");
+          }
+          break
         }
       }
     });
@@ -345,7 +375,8 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
         "content-type": "application/json",
         // authorization: '',
         "user-agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/0.1.0 Chrome/108.0.5359.62 Electron/22.0.0 Safari/537.36",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/0.2.0 Chrome/108.0.5359.62 Electron/22.0.0 Safari/537.36",
+        Authorization: "Bearer " + this.accessToken,
       },
       data: payload,
       responseType: "stream",
@@ -353,10 +384,21 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
     let response;
     try {
       response = await axios.request(reqData);
-    } catch (e) {
+    } catch (e: any) {
+      if (e.response.status==401) {
+        this._view?.webview.postMessage({
+          type: "showInput",
+          value: "请先点击上方的登录按钮进行登录后使用",
+        });
+        return;
+      }
+      // this._view?.webview.postMessage({
+      //   type: "showInput",
+      //   value: "使用超出上限，请重试，如果还是不行，请稍等几分钟重试...",
+      // });
       this._view?.webview.postMessage({
         type: "showInput",
-        value: "使用超出上限，请重试，如果还是不行，请稍等几分钟重试...",
+        value: "出错啦，" + e.response.statusText,
       });
       return;
     }
@@ -520,7 +562,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
       // }
       if(isInterrupt) {
         // console.log(newContent)
-        this.continue(newContent);
+        // this.continue(newContent);
         return;
       }
     });
@@ -666,6 +708,7 @@ class CursorWebviewViewProvider implements vscode.WebviewViewProvider {
         <p>快捷键二：在代码框中按下Ctrl+Alt+U弹出对话消息发送框</p>
         <p>Tips：如果出现空白，没有回答内容的情况，请直接点击停止响应</p>
         <p>Github：https://github.com/Meteo-Pig/CursorCode</p>
+        <p style="text-align: center;"><button id="login-btn">登录Cursor账户</button></p>
       </div>
 
       <div id="chat-box" class="pt-6 text-sm">请输入你的问题：</div>

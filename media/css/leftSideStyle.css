@@ -138,3 +138,10 @@ code {
 #clear-msg:hover {
     color: var(--vscode-errorForeground);
 }
+
+#login-btn {
+    padding: 4px;
+    border-radius: 4px;
+    color: var(--vscode-focusBorder);
+    border: 1px solid var(--vscode-focusBorder);
+}
