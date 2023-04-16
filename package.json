@@ -2,7 +2,7 @@
   "name": "cursorcode",
   "displayName": "CursorCode(Cursor for VSCode)",
   "description": "a free AI coder with GPT",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "meteorstudio",
   "icon": "resources/extensionIcon.png",
   "license": "MIT",

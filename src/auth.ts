@@ -4,6 +4,8 @@ import { exec } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 const axios = require("axios").default;
 
+import * as vscode from "vscode";
+
 const m = "https://cursor.so"
     , v = "https://aicursor.com"
     , w = "KbZUR41cY7W6zRSdpSUJ7I7mLYBKOCmB"
@@ -37,14 +39,15 @@ export async function loginCursor() {
 
     let cmd = ''
     let url = `${i}?challenge=${challenge}&uuid=${uuid}`
-    if (process.platform === 'darwin') {
-        cmd = `open "${url}"` // macOS
-    } else if (process.platform === 'win32') {
-        cmd = `start "" "${url}"` // Windows
-    } else {
-        cmd = `xdg-open "${url}"` // Linux
-    }
-    exec(cmd);
+    // if (process.platform === 'darwin') {
+    //     cmd = `open "${url}"` // macOS
+    // } else if (process.platform === 'win32') {
+    //     cmd = `start "" "${url}"` // Windows
+    // } else {
+    //     cmd = `xdg-open "${url}"` // Linux
+    // }
+    // exec(cmd);
+    vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
 
     return await new Promise(resolve => {
         const timer = setInterval(async () => {
